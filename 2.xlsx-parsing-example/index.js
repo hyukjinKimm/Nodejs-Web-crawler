@@ -6,9 +6,9 @@ const add_to_sheet = require('./add_to_sheet');
 const workbook = xlsx.readFile('xlsx/data.xlsx');
 const ws = workbook.Sheets.영화목록;
 const records = xlsx.utils.sheet_to_json(ws);
+
 const crawler = async () => {
   add_to_sheet(ws, 'C1', 's', '평점');
-
   for (const [i, r] of records.entries()) {
     const response = await axios.get(r.링크);
     if (response.status === 200 ){ // 응답이 성공한 경우 
