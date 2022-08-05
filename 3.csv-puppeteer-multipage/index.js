@@ -6,27 +6,28 @@ const csv = fs.readFileSync('csv/data.csv');
 const records = parse(csv.toString('utf-8'));
 
 const crawler = async () => {
-  const browser = await puppeteer.launch({ headless: process.env.NODE_ENV === 'production' });
-  
-  const [page, page2, page3] =   await Promise.all([
-    browser.newPage(),
-    browser.newPage(),
-    browser.newPage()
-  ])
-  await Promise.all([
-    page.goto('https://zerocho.com'),
-    page2.goto('https://naver.com'),
-    page3.goto('https://google.com')
-  ]);
-  await Promise.all([
-    page.waitForTimeout(1000),
-    page2.waitForTimeout(2000),
-    page3.waitForTimeout(3000)
-  ]);
-  await page.close();
-  await page2.close();
-  await page3.close();
+  try{
+    const browser = await puppeteer.launch({ headless: process.env.NODE_ENV === 'production' });
+    await Promise.all(records.map(async (r, i) => {
+      try{
+        const page = await browser.newPage();
+        await page.goto(r[1]);
+        const scoreE1 = await page.$('.score_left .star_score');
+        if (scoreE1) {
+          const text = await page.evaluate(tag => tag.textContent, scoreE1)
+          console.log(r[0], " 평점:",text.trim());
+        }
+        await page.close();
+      } catch(e){
+          console.error(e);
+      }
+
+    }))
   await browser.close();
+  } catch(e) {
+    console.error(e);
+  }
+
 };
 
 crawler();
