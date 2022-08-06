@@ -16,14 +16,21 @@ const crawler = async () => {
       try{
         const page = await browser.newPage();
         await page.goto(r[1]);
-        const scoreE1 = await page.$('.score_left .star_score');
-        if (scoreE1) {
-          const text = await page.evaluate(tag => tag.textContent, scoreE1)
-          console.log(r[0], " 평점:",text.trim());
-          // result.push([r[0], r[1], text.trim()]); 원본 data 와 저장 data 의 순서 보장이 안됨.
+        // const 태그핸들러 = await page.$(선택자);
+        
+        const text = await page.evaluate(() => { //document 를 쓸 수 있다.
+          const score = document.querySelector('.score_left .star_score');
+          if(score){
+            return score.textContent;;
+          }
+        });
+        if ( text ) {
+          console.log(r[0], '평점', text.trim() );
           result[i] = [r[0], r[1], text.trim()];
-
         }
+
+
+
         await page.close();
       } catch(e){
           console.error(e);
