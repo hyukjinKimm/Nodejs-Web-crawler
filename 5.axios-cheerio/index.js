@@ -37,12 +37,12 @@ const crawler = async () => {
         let score = '';
         if(scoreEl){
           score =  score + scoreEl.textContent;;
-          
+    
         }
         const imgEl =  document.querySelector('.poster img');
         let img = '';
         if (imgEl) {
-          img = imgEl + imgEl.scr;
+          img = img + imgEl.src;
         }
         return { score, img };
       });
@@ -52,7 +52,17 @@ const crawler = async () => {
         const newCell = 'C' + (i + 2);
         add_to_sheet(ws, newCell, 'n', parseFloat(result.score.trim()));
       }
+      console.log(result.img);
+      
+      if (result.img) {
+
+        const imgResult = await axios.get(result.img.replace(/\?.*$/, ''), {
+          responseType: 'arraybuffer',
+        });
+        fs.writeFileSync(`poster/${r.제목}.jpg`,imgResult.data)
+      }
       //await page.waitForTimeout(1000);
+      
     };
     await page.close();
     await browser.close();
