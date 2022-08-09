@@ -24,8 +24,15 @@ fs.readdir('poster', (err) => {
 const crawler = async () => {
 
   try{
-    const browser = await puppeteer.launch({ headless: process.env.NODE_ENV === 'production' });
+    const browser = await puppeteer.launch({ 
+        headless: process.env.NODE_ENV === 'production',
+      args: ['--window-size=1920,1080'] });  // 브라우저 크기 키우기
+
     const page = await browser.newPage();
+    await page.setViewport({ // 화면 크기 키우기
+      width: 1920,
+      height: 1080,
+    });
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36');
     add_to_sheet(ws, 'C1', 's', '평점');
 
@@ -52,9 +59,18 @@ const crawler = async () => {
         const newCell = 'C' + (i + 2);
         add_to_sheet(ws, newCell, 'n', parseFloat(result.score.trim()));
       }
-      console.log(result.img);
-      
       if (result.img) {
+        const buffer = await page.screenshot({ 
+            path: `screenshot/${r.제목}.png`,
+            //fullPage: true,   전체화면 스크릿 샷
+            clip: {
+             x: 100,
+             y : 100,
+             width: 300,
+             height: 300,
+            } 
+        });
+        //fs.writeFileSync('screenshot/', buffer);
 
         const imgResult = await axios.get(result.img.replace(/\?.*$/, ''), {
           responseType: 'arraybuffer',
