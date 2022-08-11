@@ -63,7 +63,7 @@ const crawler = async () => {
         const buffer = await page.screenshot({ 
             path: `screenshot/${r.제목}.png`,
             //fullPage: true,   전체화면 스크릿 샷
-            clip: {
+            clip: { // clip 과 fullPage 는 exclusive 다 
              x: 100,
              y : 100,
              width: 300,
