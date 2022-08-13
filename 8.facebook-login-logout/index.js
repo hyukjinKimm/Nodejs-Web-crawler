@@ -20,12 +20,20 @@ const crawler = async () => {
     await page.click('._6ltg button');
     await page.waitForTimeout(5000);
     await page.keyboard.press('Escape');
-
+    await page.waitForTimeout(3000);
+    await page.click('.j83agx80.l9j0dhe7 image');
+    await page.waitForSelector('.b20td4e0.muag1w35 > div:last-child span');
+    await page.waitForTimeout(3000);
+    await page.click('.b20td4e0.muag1w35 > div:last-child span');
+/*     await page.evaluate(() => { dom API 도 사용 가능
+      document.querySelector('.b20td4e0.muag1w35 > div:last-child span').click();
+    }) */
+    
 /*     await page.evaluate(( id, password ) => {
-        document.querySelector("#email").value = id;
-        document.querySelector("#pass").value = password;
-        document.querySelector('._6ltg button').click();
-    }, id, password) */
+    document.querySelector("#email").value = id;
+    document.querySelector("#pass").value = password;
+    document.querySelector('._6ltg button').click();
+}, id, password) */
 
     //await page.close();
     //await browser.close();
