@@ -13,11 +13,19 @@ const crawler = async () => {
     const id = process.env.ID;
     const password = process.env.PASSWORD;
     await page.goto('https://facebook.com');
-    await page.evaluate(( id, password ) => {
+    await page.type('#email', process.env.ID);
+    await page.type('#pass', process.env.PASSWORD);
+    await page.hover('._6ltg button');
+    await page.waitForTimeout(3000);
+    await page.click('._6ltg button');
+    await page.waitForTimeout(5000);
+    await page.keyboard.press('Escape');
+
+/*     await page.evaluate(( id, password ) => {
         document.querySelector("#email").value = id;
         document.querySelector("#pass").value = password;
         document.querySelector('._6ltg button').click();
-    }, id, password)
+    }, id, password) */
 
     //await page.close();
     //await browser.close();
