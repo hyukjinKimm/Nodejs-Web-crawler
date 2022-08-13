@@ -19,7 +19,7 @@ const crawler = async () => {
             window.scrollTo(0, 0);
             let images = []; 
             //const imgEls = document.querySelectorAll('.ripi6  img.YVj9w');
-            const imgEls = document.querySelectorAll('.VQW0y');
+            const imgEls = document.querySelectorAll('figure');
             if(imgEls.length) { 
               imgEls.forEach((v) => {
                 let src = v.querySelector('img.YVj9w').src;
@@ -42,7 +42,7 @@ const crawler = async () => {
       const imageResult = await axios.get(src.replace(/\?.*$/, ''), {
         responseType: 'arraybuffer',
       });
-      fs.writeFileSync(`images/${new Date().valueOf()}.jpg`, imageResult.data); // 현재시간을 파일 이름으로 
+      fs.writeFileSync(`images/${new Date().valueOf()}.jpeg`, imageResult.data); // 현재시간을 파일 이름으로 
 
     });
     await page.close();
