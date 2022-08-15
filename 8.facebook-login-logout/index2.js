@@ -12,7 +12,7 @@ const crawler = async () => {
     });
     const id = process.env.ID;
     const password = process.env.PASSWORD;
-    await page.goto('https://facebook.com');
+    await page.goto('https://stackoverflow.com/users/login?ssrc=head&returnurl=https%3a%2f%2fstackoverflow.com%2f');
     await page.evaluate(() => {
         (() => {
           const box = document.createElement('div');
@@ -77,7 +77,7 @@ const crawler = async () => {
         })();
       });
   
-    await page.mouse.move(100, 100);
+/*     await page.mouse.move(100, 100);
     await page.waitForTimeout(1000);
 
     await page.mouse.down();
@@ -87,12 +87,22 @@ const crawler = async () => {
     await page.waitForTimeout(1000);
     
     await page.mouse.up();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1000); */
     
     //await page.close();
     //await browser.close();
-
-
+    await page.click('#email');
+    
+    await page.keyboard.down('ShiftLeft');
+    await page.keyboard.press('KeyZ');
+    await page.waitForTimeout(1000);
+    await page.keyboard.press('KeyF');
+    await page.waitForTimeout(1000);
+    await page.keyboard.press('KeyF');
+    await page.waitForTimeout(1000);
+    await page.keyboard.press('KeyF');
+    await page.keyboard.up('ShiftLeft');
+    
   } catch (e) {
 
   }
