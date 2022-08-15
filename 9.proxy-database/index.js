@@ -1,17 +1,19 @@
 const puppeteer = require('puppeteer');
-const { sequelize } = require('./models');
-sequelize.sync({ force: true })
+const db = require('./models');
+/* sequelize.sync({ force: true })
   .then(() => {
     console.log('데이터베이스 연결 성공');
   })
   .catch((err) => {
     console.error(err);
-  });
+  }); */
 
 
-  
+
 const crawler = async () => {
+  
   try {
+    await db.sequelize.sync();
     let browser = await puppeteer.launch({
       headless: false,
       args: ['--window-size=1920,1080', '--disable-notifications'],
@@ -44,16 +46,26 @@ const crawler = async () => {
     });
    });
    const filtered =  proxies.filter((v) => v.type.startsWith('HTTP')).sort((p, c) => c.uptime - p.uptime);
-
+   await Promise.all(filtered.map((v) => {
+    db.Proxy.create({
+        ip: v.ip,
+        type: v.type,
+        uptime: v.uptime
+    })
+   }))
    await page.close();
    await browser.close();
-   browser = await puppeteer.launch({
+   const fastestProxy = await db.Proxy.findOne({
+    order: [['uptime', 'DESC']]
+   });
+   console.log(fastestProxy.uptime)
+  /*  browser = await puppeteer.launch({
     headless: false,
-    args: ['--window-size=1920,1080', '--disable-notifications', `--proxy-server=${filtered[0].ip}`],
+    args: ['--window-size=1920,1080', '--disable-notifications', `--proxy-server=${fastestProxy.ip}`],
   });
 
-   page = await browser.newPage();
-
+   page = await browser.newPage(); */
+   await db.sequelize.close();
   } catch (e) {
     console.error(e);
   }
