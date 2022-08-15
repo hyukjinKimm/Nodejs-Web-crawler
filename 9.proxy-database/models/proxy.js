@@ -6,6 +6,7 @@ module.exports = class Proxy extends Sequelize.Model {
       ip: {
         type: Sequelize.STRING(40),
         allowNull: false,
+        unique: true
       },
       type: {
          type: Sequelize.STRING(20),

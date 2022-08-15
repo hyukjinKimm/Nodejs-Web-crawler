@@ -47,7 +47,7 @@ const crawler = async () => {
    });
    const filtered =  proxies.filter((v) => v.type.startsWith('HTTP')).sort((p, c) => c.uptime - p.uptime);
    await Promise.all(filtered.map((v) => {
-    db.Proxy.create({
+    db.Proxy.upsert({
         ip: v.ip,
         type: v.type,
         uptime: v.uptime
@@ -55,16 +55,39 @@ const crawler = async () => {
    }))
    await page.close();
    await browser.close();
-   const fastestProxy = await db.Proxy.findOne({
+   const fastestProxy = await db.Proxy.findAll({
     order: [['uptime', 'DESC']]
    });
-   console.log(fastestProxy.uptime)
-  /*  browser = await puppeteer.launch({
+   
+   browser = await puppeteer.launch({
     headless: false,
-    args: ['--window-size=1920,1080', '--disable-notifications', `--proxy-server=${fastestProxy.ip}`],
-  });
+    args: ['--window-size=1920,1080', '--disable-notifications', `--proxy-server=${fastestProxy[0].ip}`],
+   });
+   const browser2 = await puppeteer.launch({
+      headless: false,
+      args: ['--window-size=1920,1080', '--disable-notifications', `--proxy-server=${fastestProxy[1].ip}`],
+    });
+    const browser3 = await puppeteer.launch({
+      headless: false,
+      args: ['--window-size=1920,1080', '--disable-notifications', `--proxy-server=${fastestProxy[2].ip}`],
+    });
 
-   page = await browser.newPage(); */
+   page = await browser.newPage();
+   const page2 = await browser2.newPage();  
+   const page3 = await browser3.newPage();
+
+/*    await page.goto('http://test.com');
+   await page2.goto('http://test.com');
+   await page3.goto('http://test.com'); */
+   
+   await page.close()
+   await page2.close()
+   await page3.close()
+   
+   await browser.close();
+   await browser2.close();
+   await browser3.close();
+   
    await db.sequelize.close();
   } catch (e) {
     console.error(e);
