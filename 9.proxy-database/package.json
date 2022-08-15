@@ -10,6 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.1",
-    "puppeteer": "^16.1.0"
+    "mysql2": "^2.3.3",
+    "puppeteer": "^16.1.0",
+    "sequelize": "^6.21.3",
+    "sequelize-cli": "^6.4.1"
   }
 }
