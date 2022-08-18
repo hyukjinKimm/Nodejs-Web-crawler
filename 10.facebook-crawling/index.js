@@ -30,13 +30,27 @@ const crawler = async () => {
       const firstFeed = document.querySelector('[data-pagelet^="FeedUnit_"]');
       const name = firstFeed.querySelector('h4 strong') && firstFeed.querySelector('h4 strong').innerText;
       const content = firstFeed.querySelector('[data-ad-comet-preview="message"]') && firstFeed.querySelector('[data-ad-comet-preview="message"]').innerText;
+      const img = firstFeed.querySelectorAll('.om3e55n1[id^=jsc] img') && firstFeed.querySelectorAll('.om3e55n1[id^=jsc] img').src;
+      if (firstFeed.querySelector('[aria-label="좋아요 삭제"]')){
+        firstFeed.querySelector('[aria-label="좋아요 삭제"]').click();
+      } else{
+        firstFeed.querySelector('[aria-label="좋아요"]').click();
+      }
 
+      firstFeed.parentNode.removeChild(firstFeed);
       return {
-        name, content
+        name, content, img
       };
     })
-
+/*     const likeBtn = await page.$('[data-pagelet^="FeedUnit_"] [aria-label="좋아요"]')
+    
+    await page.evaluate((like) => {
+      like.click();
+    }, likeBtn)
+ */
     console.log(newPost);
+
+      
   } catch (e) {
     console.error(e);
   }
