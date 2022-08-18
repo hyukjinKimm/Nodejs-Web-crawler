@@ -18,12 +18,25 @@ const crawler = async () => {
     await page.goto('https://facebook.com');
     await page.type('#email', process.env.ID);
     await page.type('#pass', process.env.PASSWORD);
-    await page.waitForTimeout(2000);
+    //await page.waitForTimeout(2000);
     await page.click('._6ltg button');
     await page.waitForResponse((response) => {
       return response.url().includes('sk');
     });
-    await page.keyboard.press('Escape');
+    
+    await page.goto('https://facebook.com');
+    await page.waitForSelector('[data-pagelet^="FeedUnit_"]');
+    const newPost = await page.evaluate(() => {
+      const firstFeed = document.querySelector('[data-pagelet^="FeedUnit_"]');
+      const name = firstFeed.querySelector('h4 strong') && firstFeed.querySelector('h4 strong').innerText;
+      const content = firstFeed.querySelector('[data-ad-comet-preview="message"]') && firstFeed.querySelector('[data-ad-comet-preview="message"]').innerText;
+
+      return {
+        name, content
+      };
+    })
+
+    console.log(newPost);
   } catch (e) {
     console.error(e);
   }
