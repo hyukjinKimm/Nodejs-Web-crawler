@@ -25,31 +25,43 @@ const crawler = async () => {
     });
     
     await page.goto('https://facebook.com');
-    await page.waitForSelector('[data-pagelet^="FeedUnit_"]');
-    const newPost = await page.evaluate(() => {
-      const firstFeed = document.querySelector('[data-pagelet^="FeedUnit_"]');
-      const name = firstFeed.querySelector('h4 strong') && firstFeed.querySelector('h4 strong').innerText;
-      const content = firstFeed.querySelector('[data-ad-comet-preview="message"]') && firstFeed.querySelector('[data-ad-comet-preview="message"]').innerText;
-      const img = firstFeed.querySelectorAll('.om3e55n1[id^=jsc] img') && firstFeed.querySelectorAll('.om3e55n1[id^=jsc] img').src;
-      if (firstFeed.querySelector('[aria-label="좋아요 삭제"]')){
-        firstFeed.querySelector('[aria-label="좋아요 삭제"]').click();
-      } else{
-        firstFeed.querySelector('[aria-label="좋아요"]').click();
-      }
 
-      firstFeed.parentNode.removeChild(firstFeed);
-      return {
-        name, content, img
-      };
-    })
-/*     const likeBtn = await page.$('[data-pagelet^="FeedUnit_"] [aria-label="좋아요"]')
-    
-    await page.evaluate((like) => {
-      like.click();
-    }, likeBtn)
- */
-    console.log(newPost);
-
+    let result = [];
+    while(result.length < 10){
+      await page.waitForSelector('[data-pagelet^="FeedUnit_"]');
+      const newPost = await page.evaluate(() => {
+        const firstFeed = document.querySelector('[data-pagelet^="FeedUnit_"]');
+        const name = firstFeed.querySelector('h4 strong') && firstFeed.querySelector('h4 strong').innerText;
+        const content = firstFeed.querySelector('[data-ad-comet-preview="message"]') && firstFeed.querySelector('[data-ad-comet-preview="message"]').innerText;
+        const img = firstFeed.querySelector('.om3e55n1[id^=jsc] img') && firstFeed.querySelector('.om3e55n1[id^=jsc] img').src;
+        if (firstFeed.querySelector('[aria-label="좋아요 삭제"]')){
+          firstFeed.querySelector('[aria-label="좋아요 삭제"]').click();
+        } else{
+          firstFeed.querySelector('[aria-label="좋아요"]').click();
+        }
+  
+        
+        return {
+          name, content, img
+        };
+      })
+      await page.waitForTimeout(2000);
+      await page.evaluate(() => {
+        const firstFeed = document.querySelector('[data-pagelet^="FeedUnit_"]');
+        firstFeed.parentNode.removeChild(firstFeed);
+      })
+  /*     const likeBtn = await page.$('[data-pagelet^="FeedUnit_"] [aria-label="좋아요"]')
+      
+      await page.evaluate((like) => {
+        like.click();
+      }, likeBtn)
+   */
+      console.log(newPost);
+      
+      result.push(newPost);
+    }
+   
+    console.log(result);
       
   } catch (e) {
     console.error(e);
