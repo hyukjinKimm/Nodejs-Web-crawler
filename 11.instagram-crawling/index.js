@@ -37,6 +37,19 @@ const crawler = async () => {
         //await page.waitForNavigation(); // 페이스북 로그인 페이지로 넘어가는 것을 기다림 
         console.log('로그인을 완료 했습니다.')
     }
+    await page.waitForSelector('article');
+    const newPost = await page.evaluate(() => {
+      const article = document.querySelector('article:nth-child(2)');
+      const postId = article.querySelector('article [href^="/p"]') && article.querySelector('article [href^="/p"]').href;
+      const name = article.querySelector('article a') && article.querySelector('article a').href;
+      const img = article.querySelector('article ._aagt') && article.querySelector('article ._aagt').src;
+      const content = article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span') && article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span').innerHTML;
+      
+      return {
+        postId, name, img, content
+      }
+    });
+    console.log(newPost);
 
   } catch (e) {
     console.error(e);
