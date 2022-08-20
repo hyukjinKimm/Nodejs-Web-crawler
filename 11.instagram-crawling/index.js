@@ -38,18 +38,42 @@ const crawler = async () => {
         console.log('로그인을 완료 했습니다.')
     }
     await page.waitForSelector('article');
-    const newPost = await page.evaluate(() => {
-      const article = document.querySelector('article:nth-child(2)');
-      const postId = article.querySelector('article [href^="/p"]') && article.querySelector('article [href^="/p"]').href;
-      const name = article.querySelector('article a') && article.querySelector('article a').href;
-      const img = article.querySelector('article ._aagt') && article.querySelector('article ._aagt').src;
-      const content = article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span') && article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span').innerHTML;
-      
-      return {
-        postId, name, img, content
+    const result = [];
+    let prevPostId = '';
+    while ( result.length < 10 ) {
+      const moreBtn = await page.$('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) div'); // 더보기 버튼 클릭
+      if(moreBtn){
+        await page.evaluate((btn) => btn.click(), moreBtn);
       }
-    });
-    console.log(newPost);
+  
+
+      const newPost = await page.evaluate(() => {
+        const article = document.querySelector('article');
+        const postId = article.querySelector('article [href^="/p"]') && article.querySelector('article [href^="/p"]').href;
+        const name = article.querySelector('article a') && article.querySelector('article a').href;
+        const img = article.querySelector('article ._aagt') && article.querySelector('article ._aagt').src;
+        const content = article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span') && article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span').innerHTML;
+        
+        return {
+          postId, name, img, content
+        }
+      });
+
+      if(prevPostId !== newPost.postId){
+        console.log(newPost);
+        if(!result.find((v) => v.postId === newPost.postId)){
+          result.push(newPost);
+        }
+
+      }
+      prevPostId = newPost.postId
+      console.log(result.length)
+      await page.waitForTimeout(1000);
+      await page.evaluate(() => window.scrollBy(0, 1100));
+      
+    }
+    console.log(result);
+    console.log(result.length);
 
   } catch (e) {
     console.error(e);
