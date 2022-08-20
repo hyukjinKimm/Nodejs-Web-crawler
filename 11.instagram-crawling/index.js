@@ -40,7 +40,7 @@ const crawler = async () => {
     await page.waitForSelector('article');
     const result = [];
     let prevPostId = '';
-    while ( result.length < 10 ) {
+    while ( result.length < 5 ) {
       const moreBtn = await page.$('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) div'); // 더보기 버튼 클릭
       if(moreBtn){
         await page.evaluate((btn) => btn.click(), moreBtn);
@@ -49,10 +49,10 @@ const crawler = async () => {
 
       const newPost = await page.evaluate(() => {
         const article = document.querySelector('article');
-        const postId = article.querySelector('article [href^="/p"]') && article.querySelector('article [href^="/p"]').href;
-        const name = article.querySelector('article a') && article.querySelector('article a').href;
+        const postId = article.querySelector('article [href^="/p"]') && article.querySelector('article [href^="/p"]').href.split('/').slice(-3, -2)[0];
+        const name = article.querySelector('article a') && article.querySelector('article a').href.split('/')[3];
         const img = article.querySelector('article ._aagt') && article.querySelector('article ._aagt').src;
-        const content = article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span') && article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span').innerHTML;
+        const content = article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span') && article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span').innerText;
         
         return {
           postId, name, img, content
@@ -62,10 +62,22 @@ const crawler = async () => {
       if(prevPostId !== newPost.postId){
         console.log(newPost);
         if(!result.find((v) => v.postId === newPost.postId)){
-          result.push(newPost);
+          const exist = await db.Instagram.findOne({where: {postId: newPost.postId}});
+          if(!exist) {
+            console.log('push')
+            result.push(newPost);
+          }
         }
-
       }
+      await page.waitForTimeout(1000);
+  
+      await page.evaluate(() => {
+        const article = document.querySelector('article');
+        const heartBtn = article.querySelector('._aamw button');
+        if(heartBtn.querySelector('svg[aria-label="좋아요"]')){
+          heartBtn.click();
+        }
+      })
       prevPostId = newPost.postId
       console.log(result.length)
       await page.waitForTimeout(1000);
@@ -74,7 +86,16 @@ const crawler = async () => {
     }
     console.log(result);
     console.log(result.length);
+    await Promise.all(result.map((v) => {
+      return db.Instagram.create({
+        postId: v.postId,
+        media: v.img,
+        content: v.content,
+        writer: v.name
+      });
+    }))
 
+    await db.sequelize.close();
   } catch (e) {
     console.error(e);
   }
