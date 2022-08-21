@@ -21,7 +21,7 @@ const crawler = async () => {
     const id = process.env.ID;
     const password = process.env.PASSWORD;
     await page.goto('https://instagram.com');
-
+    await page.waitForTimeout(3000);
     if (await page.$('[href="/rraamm_m/"]')) {
       console.log('이미 로그인 되어 있습니다.');
     } else {
@@ -39,6 +39,7 @@ const crawler = async () => {
     }
     await page.waitForSelector('article');
     const result = [];
+
     let prevPostId = '';
     while ( result.length < 5 ) {
       const moreBtn = await page.$('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) div'); // 더보기 버튼 클릭
@@ -47,18 +48,30 @@ const crawler = async () => {
       }
   
 
-      const newPost = await page.evaluate(() => {
+      const newPost = await page.evaluate(async () => {
         const article = document.querySelector('article');
         const postId = article.querySelector('article [href^="/p"]') && article.querySelector('article [href^="/p"]').href.split('/').slice(-3, -2)[0];
         const name = article.querySelector('article a') && article.querySelector('article a').href.split('/')[3];
         const img = article.querySelector('article ._aagt') && article.querySelector('article ._aagt').src;
         const content = article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span') && article.querySelector('span._aacl._aaco._aacu._aacx._aad7._aade:nth-child(3) span').innerText;
         
+        const comments = [];
+        document.querySelector('article ._aamx ._abl-').click();
+        await new Promise(function(resolve) { 
+          setTimeout(resolve, 3000)
+        });
+        const commentTags = document.querySelectorAll('ul ul li ._a9zr');
+        Array.from(commentTags).forEach((c) => {
+          const name = c.querySelector('h3').textContent;
+          const comment = c.querySelector('._a9zs').textContent;
+          comments.push({name, comment});
+        });      
         return {
-          postId, name, img, content
+          postId, name, img, content, comments
         }
       });
-
+      await  page.click('svg[aria-label="닫기"]');
+      await page.waitForTimeout(1000);
       if(prevPostId !== newPost.postId){
         console.log(newPost);
         if(!result.find((v) => v.postId === newPost.postId)){
@@ -85,7 +98,7 @@ const crawler = async () => {
       
     }
     console.log(result);
-    console.log(result.length);
+  
     await Promise.all(result.map((v) => {
       return db.Instagram.create({
         postId: v.postId,
