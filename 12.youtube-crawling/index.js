@@ -1,55 +1,64 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra')
 const dotenv = require('dotenv');
+const fs = require('fs');
+const ytdl = require('ytdl-core');
+dotenv.config()
 
-const db = require('./models');
-dotenv.config();
+// 플러그인을 puppeteer의 기본값으로 넣어주세요.
+const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 
-const crawler  = async () => {
-  try{
-    await db.sequelize.sync();
-    const browserFetcher = puppeteer.createBrowserFetcher(); // await 없음
-    const revisionInfo = browserFetcher.download('1042288'); // download 의 인자로 node_checkavailability 의 결과로 선택한 크로미윰의 버전을 적어준다
 
-    const browser = await puppeteer.launch({ 
-        headless: false, 
-        executablePath:  revisionInfo.executablePath, // 여기에 추가로 적어줌.
-        args: ["--window-size=1920,700", "--disable-notifications"],
-        userDataDir: './data'
-     });
-     
-     const page = await browser.newPage();
-     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36');
-     await page.setViewport({
-         width: 700,
-         height: 900
-     });
+puppeteer.use(StealthPlugin())
 
-     await page.goto('https://youtube.com', {
-        waitUntil: 'networkidle0' // 모든 네트워크 요청이 마무리 되야 다음 코드로 진행.
-     });
-     if(!await page.$('avatar-btn')){
+// 일반적인 사용 예시
+puppeteer.launch({
+     headless: false,
+     userDataDir: './data' }
+    )
+    .then(async browser => {
+    console.log('Running tests..')
+    const page = await browser.newPage()
+    await page.goto('https://youtube.com')
+    if(!await page.$('#avatar-btn'))
+    {
         await page.waitForSelector('#buttons ytd-button-renderer:last-child a');
         await page.click('#buttons ytd-button-renderer:last-child a');
         await page.waitForNavigation({
-           waitUntil: 'networkidle2' // 2개정도의 네트워크 요청은 덜 마무리 되어도 다음 코드로 진행
+        waitUntil: 'networkidle2' // 2개정도의 네트워크 요청은 덜 마무리 되어도 다음 코드로 진행
         });
         await page.waitForSelector('#identifierId');
         await page.type('#identifierId', process.env.GOOGLE_ID);
         await page.waitForSelector('#identifierNext');
-        await page.click('#identifierNext')
-        /**
-         * 
-         *  로그인 코드 작성
-         */
-     } else {
-        console.log('이미 로그인 됨')
-     }
+        await page.click('#identifierNext')   
+        await page.waitForSelector('input[name="Passwd"]');
+        await page.evaluate((password)=> {
+        document.querySelector('input[name="Passwd"]').value = password;
+    
+        }, process.env.GOOGLE_PASSWORD);
+        await page.waitForTimeout(3000);
+        await page.waitForSelector('#passwordNext');
+        await page.click('#passwordNext');
+    } else{
+        console.log('이미 로그인 된 상태입니다.')
+    }
 
-     // await page.close();
-     // await browser.close();
-  } catch(e) {
+    
+    await page.goto('https://youtube.com/feed/trending', {
+        waitUntil: 'networkidle0'
+    });
 
-  }
-}
+    await page.waitForSelector('ytd-video-renderer');
+    await page.click('ytd-video-renderer');
 
-crawler()
+    const url = await page.url();
+    const title = await page.title();
+    console.log(url)
+    
+    const info = await ytdl.getInfo(url);
+    console.log(info)
+    ytdl(url).pipe(fs.createWriteStream(`test.mp4`));
+    
+  //await page.screenshot({ path: 'testresult.png', fullPage: true })
+  //await browser.close()
+  console.log(`All done, check the screenshot. ✨`)
+})

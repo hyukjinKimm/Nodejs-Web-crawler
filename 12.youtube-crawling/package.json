@@ -12,7 +12,10 @@
     "dotenv": "^16.0.2",
     "mysql2": "^2.3.3",
     "puppeteer": "^17.0.0",
+    "puppeteer-extra": "^3.3.4",
+    "puppeteer-extra-plugin-stealth": "^2.11.1",
     "sequelize": "^6.21.4",
-    "sequelize-cli": "^6.4.1"
+    "sequelize-cli": "^6.4.1",
+    "ytdl-core": "^4.11.1"
   }
 }
