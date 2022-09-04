@@ -1,0 +1,15 @@
+{
+  "name": "13.amazon-pagination",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index"
+  },
+  "author": "hyukjinKimm",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.2",
+    "puppeteer": "^17.1.0"
+  }
+}
